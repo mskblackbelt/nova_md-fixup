@@ -1,0 +1,77 @@
+{
+    "identifier": "design.berrybrook.nova-md-fixup",
+    "name": "Nova md-fixup",
+    "organization": "Berry Brook Designs",
+    "description": "Format and fix Markdown files using Brett Terpstra's md-fixup tool",
+    "version": "1.0",
+    "categories": ["formatters"],
+    
+    "main": "main.js",
+    
+    "activationEvents": [
+        "onLanguage:markdown"
+    ],
+    
+    "entitlements": {
+        "filesystem": "readwrite",
+        "process": true
+    },
+    
+    "commands": {
+        "extensions": [
+            {
+                "title": "Format Document",
+                "command": "nova-md-fixup.formatDocument"
+            },
+            {
+                "title": "Format Workspace",
+                "command": "nova-md-fixup.formatWorkspace"
+            }
+        ]
+    },
+    
+    "config": [
+        {
+            "key": "nova-md-fixup.executablePath",
+            "title": "Executable Path",
+            "type": "path",
+            "placeholder": "md-fixup",
+            "description": "Path to the md-fixup executable. Leave empty to use PATH."
+        },
+        {
+            "key": "nova-md-fixup.wrapWidth",
+            "title": "Wrap Width",
+            "type": "number",
+            "default": 60,
+            "description": "Text wrap width in characters (default: 60)"
+        },
+        {
+            "key": "nova-md-fixup.skipRules",
+            "title": "Skip Rules",
+            "type": "string",
+            "placeholder": "wrap,typography",
+            "description": "Comma-separated list of rule numbers or keywords to skip"
+        },
+        {
+            "key": "nova-md-fixup.formatOnSave",
+            "title": "Format on Save",
+            "type": "boolean",
+            "default": false,
+            "description": "Automatically format Markdown files when saving"
+        },
+        {
+            "key": "nova-md-fixup.reverseEmphasis",
+            "title": "Reverse Emphasis",
+            "type": "boolean",
+            "default": false,
+            "description": "Use ** for bold and _ for italic (instead of __ for bold and * for italic)"
+        },
+        {
+            "key": "nova-md-fixup.additionalArguments",
+            "title": "Additional Arguments",
+            "type": "string",
+            "placeholder": "--replacements",
+            "description": "Additional command-line arguments to pass to md-fixup"
+        }
+    ]
+}
