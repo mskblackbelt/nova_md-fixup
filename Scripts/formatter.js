@@ -25,9 +25,9 @@ class Formatter {
             const formatted = await this.runMdFixup(content);
 
             if (formatted !== null && formatted !== content) {
-                await editor.edit((textEditor) => {
-                    const fullRange = new Range(0, textEditor.document.length);
-                    textEditor.replace(fullRange, formatted);
+                const fullRange = new Range(0, document.length);
+                await editor.edit((edit) => {
+                    edit.replace(fullRange, formatted);
                 });
             }
         } catch (error) {
@@ -65,42 +65,95 @@ class Formatter {
         return new Promise((resolve, reject) => {
             const executable = Config.executablePath();
             const args = Config.buildArguments();
+            
+            console.log(`Running md-fixup: ${executable} ${args.join(' ')}`);
 
-            const process = new Process(executable, {
-                args: args,
-                stdio: "pipe"
-            });
-
-            let stdout = "";
-            let stderr = "";
-
-            process.onStdout((data) => {
-                stdout += data;
-            });
-
-            process.onStderr((data) => {
-                stderr += data;
-            });
-
-            process.onDidExit((status) => {
-                if (status === 0) {
-                    resolve(stdout);
-                } else {
-                    const errorMsg = stderr || `Process exited with status ${status}`;
-                    reject(new Error(errorMsg));
-                }
-            });
-
+            // Create temp file for input
+            const tmpDir = nova.path.join(nova.extension.workspaceStoragePath || '/tmp', 'md-fixup');
+            const tmpFile = nova.path.join(tmpDir, `temp-${Date.now()}.md`);
+            
+            console.log(`Temp file: ${tmpFile}`);
+            
             try {
-                process.start();
+                // Ensure temp directory exists
+                if (!nova.fs.access(tmpDir, nova.fs.F_OK)) {
+                    console.log(`Creating temp directory: ${tmpDir}`);
+                    nova.fs.mkdir(tmpDir);
+                }
                 
-                // Write content to stdin
-                const writer = process.stdin.getWriter();
-                writer.ready.then(() => {
-                    writer.write(content);
-                    writer.close();
+                // Write content to temp file
+                console.log(`Writing ${content.length} bytes to temp file`);
+                const file = nova.fs.open(tmpFile, 'w');
+                file.write(content);
+                file.close();
+                
+                // // Set up environment with extended PATH
+                // const env = {
+                //     PATH: [
+                //         '/usr/local/bin',
+                //         '/opt/homebrew/bin',
+                //         '/usr/bin',
+                //         '/bin'
+                //     ].join(':')
+                // };
+                
+                // console.log(`Using PATH: ${env.PATH}`);
+                
+                // // Run md-fixup with the temp file
+                // const mdFixupProcess = new Process("/usr/bin/env", {
+                //     args: [executable, ...args, tmpFile],
+                //     env: env
+                // });
+                // Run md-fixup with the temp file
+                const mdFixupProcess = new Process(executable, {
+                    args: [...args, tmpFile]//,
+                    // env: env
                 });
+
+
+                let stdout = "";
+                let stderr = "";
+
+                mdFixupProcess.onStdout((data) => {
+                    stdout += data;
+                });
+
+                mdFixupProcess.onStderr((data) => {
+                    stderr += data;
+                    console.warn("md-fixup stderr:", data);
+                });
+
+                mdFixupProcess.onDidExit((status) => {
+                    console.log(`md-fixup exited with status ${status}`);
+                    console.log(`stdout length: ${stdout.length}, stderr length: ${stderr.length}`);
+                    
+                    // Clean up temp file
+                    try {
+                        nova.fs.remove(tmpFile);
+                    } catch (e) {
+                        console.warn("Failed to remove temp file:", e);
+                    }
+                    
+                    if (status === 0) {
+                        resolve(stdout);
+                    } else {
+                        const errorMsg = stderr || `Process exited with status ${status}`;
+                        reject(new Error(errorMsg));
+                    }
+                });
+
+                console.log("Starting md-fixup process...");
+                mdFixupProcess.start();
             } catch (error) {
+                console.error("Error in runMdFixup:", error);
+                // Clean up on error
+                try {
+                    if (nova.fs.access(tmpFile, nova.fs.F_OK)) {
+                        nova.fs.remove(tmpFile);
+                    }
+                } catch (e) {
+                    // Ignore cleanup errors
+                }
                 reject(error);
             }
         });

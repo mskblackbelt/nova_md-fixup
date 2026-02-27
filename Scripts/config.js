@@ -4,8 +4,35 @@ class Config {
     }
 
     static executablePath() {
-        const path = this.get("executablePath");
-        return path && path.trim() !== "" ? path : "md-fixup";
+        const userPath = this.get("executablePath");
+        if (userPath && userPath.trim() !== "") {
+            return userPath;
+        }
+        
+        // Try common installation locations
+        const commonPaths = [
+            "/usr/bin/env md-fixup", // Fall back to PATH
+            // "/opt/homebrew/bin/md-fixup",
+            "/usr/local/bin/md-fixup",
+            "/usr/bin/md-fixup"
+        ];
+        
+        for (const path of commonPaths) {
+            if (path.startsWith("/")) {
+                // Check if file exists
+                try {
+                    if (nova.fs.access(path, nova.fs.F_OK)) {
+                        console.log(`Found md-fixup at: ${path}`);
+                        return path;
+                    }
+                } catch (e) {
+                    // Path doesn't exist, try next
+                }
+            }
+        }
+        
+        // Fall back to just "md-fixup" and hope it's in PATH
+        return "md-fixup";
     }
 
     static wrapWidth() {

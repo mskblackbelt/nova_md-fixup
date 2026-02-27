@@ -1,55 +1,56 @@
-<!--
-👋 Hello! As Nova users browse the extensions library, a good README can help them understand what your extension does, how it works, and what setup or configuration it may require.
-
-Not every extension will need every item described below. Use your best judgement when deciding which parts to keep to provide the best experience for your new users.
-
-💡 Quick Tip! As you edit this README template, you can preview your changes by selecting **Extensions → Activate Project as Extension**, opening the Extension Library, and selecting "Nova md-fixup" in the sidebar.
-
-Let's get started!
--->
-
-
-**Nova-md-fixup** provides integration with [md-fixup][1], providing (configurable) linting for Markdown files. 
+**Nova md-fixup** provides integration with [md-fixup][1], a powerful Markdown formatter by Brett Terpstra that wraps text and ensures proper formatting.
 
 [1]: https://github.com/ttscoff/md-fixup
 
 ## Requirements
 
-<!--
-🎈 If your extension depends on external processes or tools that users will need to have, it's helpful to list those and provide links to their installers:
--->
+Nova md-fixup requires md-fixup to be installed on your Mac:
 
-Nova md-fixup requires some additional tools to be installed on your Mac:
+- [md-fixup][1] - Follow the installation instructions in the repository
 
-- [md-fixup][1]
+**Important:** If md-fixup is not in a standard location, you'll need to configure the full path in the extension settings (e.g., `/opt/homebrew/bin/md-fixup` or `/usr/local/bin/md-fixup`).
 
-Follow the install instructions in the repo and make sure the install location is in Nova's PATH. 
+To find the path to md-fixup, run `which md-fixup` in Terminal.
 
 ## Usage
 
-<!--
-🎈 If users will interact with your extension manually, describe those options:
--->
+Nova md-fixup provides two commands:
 
-To run Nova md-fixup:
+- **Format Document** - Format the current Markdown file
+- **Format Workspace** - Format all open Markdown files
 
-- Select the **Editor → Nova md-fixup** menu item; or
-- Open the command palette and type `Nova md-fixup`
+To format a document:
 
-<!--
-🎈 Alternatively, if your extension runs automatically (as in the case of a validator), consider showing users what they can expect to see:
--->
+- Select **Editor → Nova md-fixup → Format Document**; or
+- Open the command palette and type "Format Document"
 
-Nova md-fixup runs any time you open a local project, automatically lints all open files, then reports errors and warnings in Nova's **Issues** sidebar and the editor gutter:
-
-![](https://nova.app/images/en/light/tools/sidebars.png)
+You can also enable **Format on Save** in the extension preferences to automatically format Markdown files when saving.
 
 ### Configuration
-
-<!--
-🎈 If your extension offers global- or workspace-scoped preferences, consider pointing users toward those settings. For example:
--->
 
 To configure global preferences, open **Extensions → Extension Library...** then select Nova md-fixup's **Preferences** tab.
 
 You can also configure preferences on a per-project basis in **Project → Project Settings...**
+
+Available settings:
+
+- **Executable Path** - Path to md-fixup (leave empty to use PATH)
+- **Wrap Width** - Text wrap width in characters (default: 60)
+- **Skip Rules** - Comma-separated list of rules to skip (e.g., "wrap,typography")
+- **Format on Save** - Automatically format when saving (default: off)
+- **Reverse Emphasis** - Use ** for bold and _ for italic (default: off)
+- **Additional Arguments** - Custom command-line arguments
+
+### md-fixup Rules
+
+md-fixup applies 33 formatting rules including:
+
+- Normalize line endings and whitespace
+- Ensure proper spacing around headers, lists, and code blocks
+- Wrap text at specified width
+- Normalize bold/italic markers
+- Fix typography (smart quotes, em dashes, etc.)
+- Format tables
+- And much more...
+
+See the [md-fixup documentation][1] for the complete list of rules and their keywords.
