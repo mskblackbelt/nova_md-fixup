@@ -14,4 +14,3 @@ Initial release
   - Skip specific rules
   - Reverse emphasis markers
   - Additional command-line arguments
-

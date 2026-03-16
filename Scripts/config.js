@@ -9,35 +9,14 @@ class Config {
             return userPath;
         }
         
-        // Try common installation locations
-        const commonPaths = [
-            "/usr/bin/env md-fixup", // Fall back to PATH
-            // "/opt/homebrew/bin/md-fixup",
-            "/usr/local/bin/md-fixup",
-            "/usr/bin/md-fixup"
-        ];
-        
-        for (const path of commonPaths) {
-            if (path.startsWith("/")) {
-                // Check if file exists
-                try {
-                    if (nova.fs.access(path, nova.fs.F_OK)) {
-                        console.log(`Found md-fixup at: ${path}`);
-                        return path;
-                    }
-                } catch (e) {
-                    // Path doesn't exist, try next
-                }
-            }
-        }
-        
-        // Fall back to just "md-fixup" and hope it's in PATH
+        // Default to md-fixup - will be resolved via /usr/bin/env using PATH
         return "md-fixup";
     }
 
     static wrapWidth() {
         const width = this.get("wrapWidth");
-        return width !== null && width !== undefined ? width : 60;
+        // Return null if not explicitly set so md-fixup can use its own config/defaults
+        return width !== null && width !== undefined ? width : null;
     }
 
     static skipRules() {
@@ -71,9 +50,10 @@ class Config {
     static buildArguments() {
         const args = [];
 
-        // Add wrap width
+        // Add wrap width only if explicitly set by user
+        // Otherwise let md-fixup use its own config file/defaults
         const width = this.wrapWidth();
-        if (width) {
+        if (width !== null && width !== undefined) {
             args.push("--width", String(width));
         }
 

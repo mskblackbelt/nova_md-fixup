@@ -57,59 +57,41 @@ class Formatter {
         );
     }
 
-    async provideFormat(editor) {
-        await this.format(editor);
-    }
-
     runMdFixup(content) {
         return new Promise((resolve, reject) => {
             const executable = Config.executablePath();
             const args = Config.buildArguments();
-            
-            console.log(`Running md-fixup: ${executable} ${args.join(' ')}`);
 
             // Create temp file for input
             const tmpDir = nova.path.join(nova.extension.workspaceStoragePath || '/tmp', 'md-fixup');
             const tmpFile = nova.path.join(tmpDir, `temp-${Date.now()}.md`);
             
-            console.log(`Temp file: ${tmpFile}`);
-            
             try {
                 // Ensure temp directory exists
                 if (!nova.fs.access(tmpDir, nova.fs.F_OK)) {
-                    console.log(`Creating temp directory: ${tmpDir}`);
                     nova.fs.mkdir(tmpDir);
                 }
                 
                 // Write content to temp file
-                console.log(`Writing ${content.length} bytes to temp file`);
                 const file = nova.fs.open(tmpFile, 'w');
                 file.write(content);
                 file.close();
                 
-                // // Set up environment with extended PATH
-                // const env = {
-                //     PATH: [
-                //         '/usr/local/bin',
-                //         '/opt/homebrew/bin',
-                //         '/usr/bin',
-                //         '/bin'
-                //     ].join(':')
-                // };
+                // Set up environment with PATH from Nova's configuration
+                const env = {
+                    PATH: nova.environment.PATH || [
+                        '/opt/homebrew/bin',
+                        '/usr/local/bin',
+                        '/usr/bin',
+                        '/bin'
+                    ].join(':')
+                };
                 
-                // console.log(`Using PATH: ${env.PATH}`);
-                
-                // // Run md-fixup with the temp file
-                // const mdFixupProcess = new Process("/usr/bin/env", {
-                //     args: [executable, ...args, tmpFile],
-                //     env: env
-                // });
                 // Run md-fixup with the temp file
-                const mdFixupProcess = new Process(executable, {
-                    args: [...args, tmpFile]//,
-                    // env: env
+                const mdFixupProcess = new Process("/usr/bin/env", {
+                    args: [executable, ...args, tmpFile],
+                    env: env
                 });
-
 
                 let stdout = "";
                 let stderr = "";
@@ -120,13 +102,9 @@ class Formatter {
 
                 mdFixupProcess.onStderr((data) => {
                     stderr += data;
-                    console.warn("md-fixup stderr:", data);
                 });
 
                 mdFixupProcess.onDidExit((status) => {
-                    console.log(`md-fixup exited with status ${status}`);
-                    console.log(`stdout length: ${stdout.length}, stderr length: ${stderr.length}`);
-                    
                     // Clean up temp file
                     try {
                         nova.fs.remove(tmpFile);
@@ -142,7 +120,6 @@ class Formatter {
                     }
                 });
 
-                console.log("Starting md-fixup process...");
                 mdFixupProcess.start();
             } catch (error) {
                 console.error("Error in runMdFixup:", error);

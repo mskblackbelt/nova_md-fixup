@@ -35,7 +35,7 @@ Mixed indentation list:
 
 ## Combined Test
 
-Line with trailing whitespace and nested list:   
+Very long line that should be cut at 80 characters rather than 60 with trailing whitespace and nested list:   
 
 * Parent item has trailing spaces at end    
     * Child item also has trailing spaces    
