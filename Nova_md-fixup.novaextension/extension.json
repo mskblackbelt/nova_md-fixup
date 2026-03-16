@@ -73,5 +73,7 @@
             "placeholder": "--replacements",
             "description": "Additional command-line arguments to pass to md-fixup"
         }
-    ]
+    ], 
+    "bugs": "https://github.com/mskblackbelt/nova_md-fixup/issues",
+    "repository": "https://github.com/mskblackbelt/nova_md-fixup"
 }
