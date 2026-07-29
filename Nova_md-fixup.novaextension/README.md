@@ -27,6 +27,9 @@ To format a document:
 * Select **Editor → Nova md-fixup → Format Document**; or
 * Open the command palette and type "Format Document"
 
+To format every open Markdown file, select **Extensions → Nova md-fixup →
+Format Workspace**.
+
 You can also enable **Format on Save** in the extension preferences to
 automatically format Markdown files when saving.
 

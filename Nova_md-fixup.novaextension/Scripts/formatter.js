@@ -1,5 +1,18 @@
 const Config = require("./config");
 
+// nova.fs.mkdir() is not recursive, and Nova creates the extension storage
+// directories lazily, so the parent may not exist on a fresh install.
+function ensureDirectory(path) {
+    if (nova.fs.access(path, nova.fs.F_OK)) {
+        return;
+    }
+    const parent = nova.path.dirname(path);
+    if (parent && parent !== path) {
+        ensureDirectory(parent);
+    }
+    nova.fs.mkdir(path);
+}
+
 class Formatter {
     constructor() {
         this.formatting = new Set();
@@ -24,7 +37,7 @@ class Formatter {
             const content = document.getTextInRange(new Range(0, document.length));
             const formatted = await this.runMdFixup(content);
 
-            if (formatted !== null && formatted !== content) {
+            if (formatted !== content) {
                 const fullRange = new Range(0, document.length);
                 await editor.edit((edit) => {
                     edit.replace(fullRange, formatted);
@@ -62,29 +75,34 @@ class Formatter {
             const executable = Config.executablePath();
             const args = Config.buildArguments();
 
-            // Create temp file for input
-            const tmpDir = nova.path.join(nova.extension.workspaceStoragePath || '/tmp', 'md-fixup');
+            // Create temp file for input. Both storage paths are private to this
+            // extension; a shared location like /tmp would let any local user
+            // pre-create or symlink the path we are about to write to.
+            const storageRoot = nova.extension.workspaceStoragePath
+                || nova.extension.globalStoragePath;
+            const tmpDir = nova.path.join(storageRoot, 'md-fixup');
             const tmpFile = nova.path.join(tmpDir, `temp-${Date.now()}.md`);
-            
+
             try {
-                // Ensure temp directory exists
-                if (!nova.fs.access(tmpDir, nova.fs.F_OK)) {
-                    nova.fs.mkdir(tmpDir);
-                }
-                
+                ensureDirectory(tmpDir);
+
                 // Write content to temp file
                 const file = nova.fs.open(tmpFile, 'w');
                 file.write(content);
                 file.close();
                 
-                // Set up environment with PATH from Nova's configuration
+                // Search Nova's inherited PATH first, then the common install
+                // locations. Nova launched from Finder inherits the launchd PATH,
+                // which omits both Homebrew prefixes, so these must be appended
+                // rather than used only as a fallback.
+                const searchPaths = (nova.environment.PATH || "").split(":");
+                for (const dir of ['/opt/homebrew/bin', '/usr/local/bin', '/usr/bin', '/bin']) {
+                    if (!searchPaths.includes(dir)) {
+                        searchPaths.push(dir);
+                    }
+                }
                 const env = {
-                    PATH: nova.environment.PATH || [
-                        '/opt/homebrew/bin',
-                        '/usr/local/bin',
-                        '/usr/bin',
-                        '/bin'
-                    ].join(':')
+                    PATH: searchPaths.filter((dir) => dir !== "").join(":")
                 };
                 
                 // Run md-fixup with the temp file
@@ -113,6 +131,17 @@ class Formatter {
                     }
                     
                     if (status === 0) {
+                        // A run that exits cleanly but emits nothing means md-fixup
+                        // never wrote the document to stdout (e.g. an in-place flag
+                        // in Additional Arguments). Treat it as a failure rather
+                        // than replacing the document with an empty string.
+                        if (stdout === "" && content !== "") {
+                            reject(new Error(
+                                "md-fixup produced no output. Check Additional Arguments — " +
+                                "md-fixup must write the formatted document to stdout."
+                            ));
+                            return;
+                        }
                         resolve(stdout);
                     } else {
                         const errorMsg = stderr || `Process exited with status ${status}`;

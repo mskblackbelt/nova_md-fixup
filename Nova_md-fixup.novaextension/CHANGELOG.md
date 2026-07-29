@@ -1,3 +1,27 @@
+## Version 1.1
+
+### Fixed
+
+- Formatting no longer empties the document when md-fixup exits successfully
+  without writing anything to standard output
+- md-fixup is now found in `/opt/homebrew/bin` and `/usr/local/bin` when Nova's
+  inherited PATH does not include them
+- Toggling "Format on Save" now takes effect on already-open documents, in both
+  directions
+- The first format on a new install no longer fails when the extension's
+  storage directory does not exist yet
+- Temporary files are written to the extension's private storage instead of a
+  shared location in `/tmp`
+
+### Changed
+
+- "Format Document" now appears in the Editor menu; "Format Workspace" remains
+  in the Extensions menu
+- Settings can now be overridden per-project in Project Settings, falling back
+  to the global values when left unset
+- The extension also activates in workspaces containing Markdown files, so
+  "Format Workspace" works before a Markdown file is opened
+
 ## Version 1.0
 
 Initial release

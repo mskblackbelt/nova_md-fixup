@@ -21,7 +21,7 @@ nova.commands.register("extension-id.commandName", (workspace) => {
 });
 ```
 
-The extension activates based on `activationEvents` in the manifest. This extension activates on `onLanguage:html`.
+The extension activates based on `activationEvents` in the manifest. This extension activates on `onLanguage:markdown` and `onWorkspaceContains:*.md`.
 
 ### External Process Integration
 

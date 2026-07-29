@@ -25,9 +25,17 @@ exports.activate = function() {
             return;
         }
         
-        if (Config.formatOnSave()) {
-            editor.onWillSave(() => formatter.format(editor));
-        }
+        // Read the preference at save time, not here: an editor opened while
+        // Format on Save was off would otherwise never pick up the setting
+        // being turned on, and one opened while it was on would keep
+        // formatting after it was turned off.
+        editor.onWillSave(() => {
+            if (!Config.formatOnSave()) {
+                return;
+            }
+            // Returned so Nova waits for the edit before writing the file.
+            return formatter.format(editor);
+        });
     });
 };
 
