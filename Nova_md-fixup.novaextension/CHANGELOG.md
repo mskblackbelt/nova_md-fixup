@@ -17,8 +17,9 @@
 
 - "Format Document" now appears in the Editor menu; "Format Workspace" remains
   in the Extensions menu
-- Settings can now be overridden per-project in Project Settings, falling back
-  to the global values when left unset
+- Settings can now be overridden per-project in Project Settings. "Format on
+  Save" and "Reverse Emphasis" are three-way there — On, Off, or Use Global
+  Setting — so a project can turn a global setting off as well as on
 - The extension also activates in workspaces containing Markdown files, so
   "Format Workspace" works before a Markdown file is opened
 

@@ -84,40 +84,52 @@
             "title": "Executable Path",
             "type": "path",
             "placeholder": "md-fixup",
-            "description": "Path to the md-fixup executable. Leave empty to inherit the global setting."
+            "description": "Path to the md-fixup executable. Replaces the global path for this project. Leave empty to use the global setting."
         },
         {
             "key": "design.berrybrook.nova-md-fixup.wrapWidth",
             "title": "Wrap Width",
             "type": "number",
             "placeholder": "60",
-            "description": "Text wrap width in characters. Leave empty to inherit the global setting."
+            "description": "Text wrap width in characters. Replaces the global width for this project. Leave empty to use the global setting."
         },
         {
             "key": "design.berrybrook.nova-md-fixup.skipRules",
             "title": "Skip Rules",
             "type": "string",
             "placeholder": "wrap,typography",
-            "description": "Comma-separated list of rule numbers or keywords to skip. Leave empty to inherit the global setting."
+            "description": "Comma-separated list of rule numbers or keywords to skip. Replaces the global list for this project rather than adding to it. Leave empty to use the global setting."
         },
         {
             "key": "design.berrybrook.nova-md-fixup.formatOnSave",
             "title": "Format on Save",
-            "type": "boolean",
-            "description": "Automatically format Markdown files when saving. Leave untouched to inherit the global setting."
+            "type": "enum",
+            "values": [
+                ["inherit", "Use Global Setting"],
+                ["on", "On"],
+                ["off", "Off"]
+            ],
+            "default": "inherit",
+            "description": "Automatically format Markdown files when saving."
         },
         {
             "key": "design.berrybrook.nova-md-fixup.reverseEmphasis",
             "title": "Reverse Emphasis",
-            "type": "boolean",
-            "description": "Use ** for bold and _ for italic. Leave untouched to inherit the global setting."
+            "type": "enum",
+            "values": [
+                ["inherit", "Use Global Setting"],
+                ["on", "On"],
+                ["off", "Off"]
+            ],
+            "default": "inherit",
+            "description": "Use ** for bold and _ for italic."
         },
         {
             "key": "design.berrybrook.nova-md-fixup.additionalArguments",
             "title": "Additional Arguments",
             "type": "string",
             "placeholder": "--replacements",
-            "description": "Additional command-line arguments to pass to md-fixup. Leave empty to inherit the global setting."
+            "description": "Additional command-line arguments to pass to md-fixup. Replaces the global arguments for this project rather than adding to them. Leave empty to use the global setting."
         }
     ],
 

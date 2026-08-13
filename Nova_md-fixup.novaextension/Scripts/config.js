@@ -4,47 +4,76 @@ class Config {
     }
 
     static executablePath() {
-        const userPath = this.get("executablePath");
-        if (userPath && userPath.trim() !== "") {
+        const userPath = this.getText("executablePath");
+        if (userPath !== null) {
             return userPath;
         }
-        
+
         // Default to md-fixup - will be resolved via /usr/bin/env using PATH
         return "md-fixup";
     }
 
     static wrapWidth() {
-        const width = this.get("wrapWidth");
-        // Return null if not explicitly set so md-fixup can use its own config/defaults
-        return width !== null && width !== undefined ? width : null;
+        // Null when not explicitly set, so md-fixup can use its own config/defaults
+        return this.getText("wrapWidth");
     }
 
     static skipRules() {
-        const rules = this.get("skipRules");
-        return rules && rules.trim() !== "" ? rules : null;
+        return this.getText("skipRules");
     }
 
     static formatOnSave() {
-        return this.get("formatOnSave") || false;
+        return this.getBoolean("formatOnSave");
     }
 
     static reverseEmphasis() {
-        return this.get("reverseEmphasis") || false;
+        return this.getBoolean("reverseEmphasis");
     }
 
     static additionalArguments() {
-        const args = this.get("additionalArguments");
-        return args && args.trim() !== "" ? args : null;
+        return this.getText("additionalArguments");
     }
 
-    static get(key) {
-        const fullKey = `${this.extensionId}.${key}`;
-        // Check workspace config first, then fall back to global config
-        let value = nova.workspace.config.get(fullKey);
+    // Treats an empty string the same as an unset value, so a cleared text
+    // field does not read as a meaningful override.
+    static isSet(value) {
         if (value === null || value === undefined) {
-            value = nova.config.get(fullKey);
+            return false;
         }
-        return value;
+        if (typeof value === "string") {
+            return value.trim() !== "";
+        }
+        return true;
+    }
+
+    // Each text setting resolves on its own: a project value replaces the
+    // global one for that field alone, and an empty project field inherits the
+    // global value rather than clearing it. Returns null when neither level
+    // sets the field.
+    static getText(key) {
+        const fullKey = `${this.extensionId}.${key}`;
+        const override = nova.workspace.config.get(fullKey);
+        if (this.isSet(override)) {
+            return override;
+        }
+        const value = nova.config.get(fullKey);
+        return this.isSet(value) ? value : null;
+    }
+
+    // Boolean settings are declared globally as a checkbox but per-project as a
+    // three-way enum. A workspace checkbox cannot distinguish "unchecked" from
+    // "not set" — both read as unset — so a project could turn a global setting
+    // on but never off. The explicit "inherit" value fixes that.
+    static getBoolean(key) {
+        const fullKey = `${this.extensionId}.${key}`;
+        const override = nova.workspace.config.get(fullKey);
+        if (override === "on") {
+            return true;
+        }
+        if (override === "off") {
+            return false;
+        }
+        return nova.config.get(fullKey) === true;
     }
 
     static buildArguments() {

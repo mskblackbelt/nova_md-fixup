@@ -39,7 +39,8 @@ To configure global preferences, open **Extensions → Extension Library...** th
 select Nova md-fixup's **Preferences** tab.
 
 You can also configure preferences on a per-project basis in **Project → Project
-Settings...**
+Settings...** Project settings override the global ones; leave a text field
+empty, or a toggle set to **Use Global Setting**, to inherit the global value.
 
 Available settings:
 
